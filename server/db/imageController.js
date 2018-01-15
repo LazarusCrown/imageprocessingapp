@@ -3,17 +3,17 @@ const ImageDB = require('./mongodb').Image;
 const Canvas = require('canvas');
 const processSepia = require('../../functions/tools');
 
-const addImage = (req, res) => {
-  ImageDB.create({ url: req.body.url }, (err, image) => {
-    if (err) throw err;
-    res.json(image);
-  });
-}
-
 const getImages = (req, res) => {
   ImageDB.find((err, images) => {
     if (err) throw err;
     res.json(images);
+  });
+}
+
+const addImage = (req, res) => {
+  ImageDB.create({ url: req.body.url }, (err, image) => {
+    if (err) throw err;
+    res.json(image);
   });
 }
 

@@ -23,6 +23,11 @@ class App extends React.Component {
     this.processImagesServer = this.processImagesServer.bind(this);
     this.processImagesWorker = this.processImagesWorker.bind(this);
     this.processImagesSingle = this.processImagesSingle.bind(this);
+   
+    //optimization metric...
+    this.runOptimization = this.runOptimization.bind(this);
+    //triggers most performant process execution...
+    this.pathOfLeastResistance = this.pathOfLeastResistance(this);
   }
 
   getImagesFromDB() {
@@ -119,6 +124,88 @@ class App extends React.Component {
     });
   }
 
+//placeholder function to simulate calculation of most performant 
+//process based on client hardware and network information
+  runOptimization() {
+    let browser = navigator.appName;
+    let pingsize = 
+
+    let optimalProcess = {
+      processlocation: null,
+      optimalthreads: null,
+      dynamicping: null,
+      browser: browser,
+      networkping: null,
+      missingdeviceinfo: null
+    };
+
+    function threadcheck(threads,browser){
+      if(browser === "Chrome"){
+        if(threads>14){
+          optimalprocess.optimalthreads = 14;
+        }else{
+          optimalprocess.optimalthreads = threads;
+        }
+      }else if(browser === "Firefox"){
+        if(threads>12){
+          optimalprocess.optimalthreads = 12;
+        }else{
+          optimalprocess.optimalthreads = threads;
+        }
+      }else if(browser === "Opera"){
+        if(threads>10){
+          optimalprocess.optimalthreads = 10;
+        }else{
+          optimalprocess.optimalthreads = threads;
+        }
+      }else{
+        optimalProcess.optimalthreads = 4;
+      }
+    }
+
+//dynamicPing() will determine the average data size for the given
+//web application and use that to run a representative network ping
+
+    function dynamicping(pingsize){
+      let avgdatasize = 0;
+      let pingdata;
+      let pingtime = null;
+
+      function generatepingdata(avgdatasize){
+      
+       return pingdata;
+      }
+
+      return pingtime;
+    }
+
+  function applymetric(pingtime,){
+
+
+  }
+
+    threadcheck();
+    dynamicping();
+    applymetric();
+
+    return optimalProcess;
+  }
+
+//function to execute most performant process based on the results of 
+//the runOptimization() metric...
+  pathOfLeastResistance(optimalProcess) {
+    //path for when server processing is most efficient method
+    if(optimalProcess.processlocation === "server"){
+      processImagesServer();
+    }
+    //path for when client processing is most efficient method
+    else if(optimalProcess.processlocation === "client"){
+      processImagesWorker();
+    }else{
+      return alert("Not enough client information to optimize!");
+    }
+  }
+
   componentDidMount() {
     this.getImagesFromDB(); 
    }
@@ -130,6 +217,9 @@ class App extends React.Component {
         <URLForm addImage={this.addImageToDB} />
         <FileUpload addImage={this.addImageToDB} />
         <Process 
+        //optimization filter...
+          runOptimization={this.runOptimization}
+ 
           processImagesServer={this.processImagesServer} 
           processImagesWorker={this.processImagesWorker} 
           processImagesSingle={this.processImagesSingle}
