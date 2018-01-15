@@ -7,6 +7,11 @@ module.exports = {
     path: path.resolve(__dirname, 'build'),
     filename: 'bundle.js',
   },
+  resolveLoader: {
+    alias: {
+      'parent-scope-loader': path.join(_dirname, 'webpack', 'optimization-loader.js')
+    }
+  },
   module: {
     rules: [
       {
@@ -22,8 +27,19 @@ module.exports = {
         test: /\.worker\.js$/,
         use: { loader: 'worker-loader' },
       },
-    ]
-  },
+
+  //      //testing for wrapping client side functionality...  
+  //     {
+  //       test: /\.js$/,
+  //       use: [
+  //         {loader: 'optimization-loader',
+  //          options: {/*...*/}
+  //         }
+  //       ],
+  //     },
+  
+       ]
+      },
   plugins: [
     new ServiceWorkerWebpackPlugin({
       entry: path.join(__dirname, 'workers/serviceWorker.js'),

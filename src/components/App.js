@@ -9,7 +9,7 @@ import convertImageToCanvas from '../../functions/convertImageToCanvas';
 import processSepia from '../../functions/tools';
 
 let threads = navigator.hardwareConcurrency || 4; // this variable will be manipulated by optimization calculation
-const pool = new Pool(threads);
+let pool = new Pool(threads);
 
 class App extends React.Component {
   constructor() {
@@ -24,10 +24,8 @@ class App extends React.Component {
     this.processImagesWorker = this.processImagesWorker.bind(this);
     this.processImagesSingle = this.processImagesSingle.bind(this);
    
-    //optimization metric...
+    //optimization + path of least resistance...
     this.runOptimization = this.runOptimization.bind(this);
-    //triggers most performant process execution...
-    this.pathOfLeastResistance = this.pathOfLeastResistance(this);
   }
 
   getImagesFromDB() {
@@ -127,17 +125,35 @@ class App extends React.Component {
 //placeholder function to simulate calculation of most performant 
 //process based on client hardware and network information
   runOptimization() {
-    let browser = navigator.appName;
-    let pingsize = 
+    let useragent = navigator.userAgent;
+    let operatingsystem = navigator.oscpu;
 
     let optimalProcess = {
       processlocation: null,
       optimalthreads: null,
-      dynamicping: null,
-      browser: browser,
-      networkping: null,
+      dynamicping: 150,
+      browser: null,
+      operatingsystem: operatingsystem,
       missingdeviceinfo: null
     };
+
+    function browsercheck(useragent){
+      let browserOptions = ["Chrome","Firefox", "Safari", "Opera", "IE"];
+      let firstIndex = Infinity;
+      let browser = null;
+
+      for(let i=0; i<browserOptions.length; i++){
+        if (useragent.includes(browserOptions[i])){
+          let index = useragent.indexOf(browserOptions[i]);
+
+          if(index>=0 && index<firstIndex){
+            firstIndex = index;
+            browser = browserOptions[i];
+          }
+        }
+      }
+      optimalProcess.browser = browser;
+    }
 
     function threadcheck(threads,browser){
       if(browser === "Chrome"){
@@ -146,7 +162,7 @@ class App extends React.Component {
         }else{
           optimalprocess.optimalthreads = threads;
         }
-      }else if(browser === "Firefox"){
+      }else if(browser === "Firefox" || "Safari"){
         if(threads>12){
           optimalprocess.optimalthreads = 12;
         }else{
@@ -163,47 +179,40 @@ class App extends React.Component {
       }
     }
 
-//dynamicPing() will determine the average data size for the given
-//web application and use that to run a representative network ping
-
-    function dynamicping(pingsize){
-      let avgdatasize = 0;
-      let pingdata;
-      let pingtime = null;
-
-      function generatepingdata(avgdatasize){
-      
-       return pingdata;
+  function applymetric(optimalProcess){
+    if(optimalProcess.pingtime>100){
+      optimalProcess.processlocation = "client";
+      if(optimalProcess.browser !== "Chrome" && optimalProcess.browser !== "Firefox" && optimalProcess.browser !== "Safari"){
+        optimalProcess.processlocation = "server";
       }
-
-      return pingtime;
+    }else if(pingtime<=100){
+      optimalProcess.processlocation = "server";
     }
-
-  function applymetric(pingtime,){
-
-
-  }
-
-    threadcheck();
-    dynamicping();
-    applymetric();
-
-    return optimalProcess;
   }
 
 //function to execute most performant process based on the results of 
 //the runOptimization() metric...
-  pathOfLeastResistance(optimalProcess) {
+  function pathOfLeastResistance(optimalProcess) {
     //path for when server processing is most efficient method
     if(optimalProcess.processlocation === "server"){
-      processImagesServer();
+      this.processImagesServer();
     }
     //path for when client processing is most efficient method
     else if(optimalProcess.processlocation === "client"){
-      processImagesWorker();
+      pool = new Pool(optimalProcess.optimalthreads);
+      this.processImagesWorker();
     }else{
       return alert("Not enough client information to optimize!");
     }
+  }
+
+    browsercheck(useragent);
+    threadcheck(threads,browser);
+    // dynamicping(pingsize);
+    applymetric(optimalProcess);
+    pathOfLeastResistance(optimalProcess);
+
+    return optimalProcess;
   }
 
   componentDidMount() {
@@ -219,10 +228,15 @@ class App extends React.Component {
         <Process 
         //optimization filter...
           runOptimization={this.runOptimization}
- 
+
+        //serverside process example...
           processImagesServer={this.processImagesServer} 
+        
+        //clientside process example...
           processImagesWorker={this.processImagesWorker} 
+        //single thread example...
           processImagesSingle={this.processImagesSingle}
+          
           getImagesFromDB={this.getImagesFromDB}
         />
         <ImagesContainer images={this.state.images} />
@@ -232,3 +246,42 @@ class App extends React.Component {
 }
 
 export default App;
+
+
+
+      // let Chrome = false;
+      // let Firefox = false;
+      // let Safari = false;
+      // let Opera = false;
+      // let IE = false;
+      // if(useragent.includes("Chrome")){
+      //   Chrome = true;
+      //   let placement1 = useragent.indexOf("Chrome");
+      // }
+      // if(useragent.includes("Firefox")){
+      //   Firefox = true;
+      //   let placement2 = useragent.indexOf("Firefox");
+      // }
+      // if(useragent.includes("Safari")){
+      //   Safari = true;
+      // }
+      // if(useragent.includes("Opera")){
+      //   Opera = true;
+      // }
+      // if(useragent.includes("IE")){
+      //   IE = true;
+      // }
+
+         // let pingsize = 10;
+
+      //dynamicPing() will determine the average data size for the given
+//web application and use that to run a representative network ping
+    // function dynamicping(pingsize){
+    //   let avgdatasize = 0;
+    //   let pingdata;
+    //   let pingtime = null;
+    //   function generatepingdata(avgdatasize){
+    //    return pingdata;
+    //   }
+    //   return pingtime;
+    // }
